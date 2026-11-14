@@ -1,4 +1,7 @@
 
+# Questions for experts
+
+What are the most difficult modules to implement ? What are the safest ones ?
 
 # What we build
 
@@ -33,6 +36,26 @@ Building it on React, with which i assume we are a bit familiar --> not for me
 
 "Upload an image or add a book or link, then place it in the room" --> yes appart from "place it in the room": the image wouldn't be editable for the MVP
 
+"Modular monolith, not microservices." --> yes absolutely, Amandine said it's a pain in the ass to implement microservices.
+
+## Questions
+
+![alt text](image.png)
+
+![alt text](image-1.png)
+
+"Request flow. The browser calls /api with a session cookie. The backend validates
+input, does its work inside a database transaction and returns JSON."
+
+"Real-time. Each logged-in client holds one WebSocket. The backend keeps one hub
+per room and broadcasts presence, object changes, guestbook entries and chat
+messages. Changes are saved first, then broadcast, so the database stays the source
+of truth. Clients reconnect with backoff and refetch the room."
+
+"Concurrency. Transactions and unique constraints protect friend requests and sign-
+ups. Each room carries a version number, and a layout save with a stale version is
+rejected instead of overwriting newer work."
+
 # Friends feedback
 
 Léopold : Carrément, essayer avec un NextJs ou un react avec vitejs et react router ça peut être très bien. Et pour le backend Adonis est bien comme framework nodejs. Mais si tu veux faire du nodejs vraiment pure express est bien aussi mais très léger. Par contre je te conseille de faire du typescript pour le frontend et le backend tout de suite, c’est plus sécurisant et propre
@@ -43,6 +66,3 @@ Léopold : Carrément, essayer avec un NextJs ou un react avec vitejs et react r
 each claimed module. Only fully functional and properly
 implemented modules will be counted toward your final score.
 Non-functional or incomplete modules = 0 points."
-
-# Questions
-
