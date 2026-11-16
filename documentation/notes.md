@@ -116,3 +116,6 @@ Data export and import
 ### Find 1 or 2 mates
 
 ### Next Steps
+
+Merve: start mandatory
+Ben: make slides synthetizing project + meeting decisions (stack, modules, DB Schema) + git commits + project organization + journal of progression 
