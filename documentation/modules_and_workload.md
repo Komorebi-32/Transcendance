@@ -205,6 +205,61 @@ How to read it:
 - Not included: the room artwork, learning time beyond what is already in each estimate, and any module added from the "swap in" list.
 - The proposal warns that a fourth member joining late or not at all is a risk, and suggests planning the core points for three people. With 3 people at 6 h/day, the total would be about 23.3 working days (420 / 18), before any margin.
 
+### Workload split by team size
+
+Scope: the 10 modules of the 14-point plan above, plus the mandatory items. The buffer modules are not split here. Estimates are the midpoints of the ranges (p-days, ±50%), so the totals differ slightly from the ≈47 and ≈12 above. Form and input validation (≈2 p-days) is not a separate line: each group validates its own forms and endpoints, and the cost is included in its module estimates. The room artwork, the room page and the mobile menu are not estimated (see §5).
+
+**How the groups are built.** Each group owns one product area end to end: its database tables, API endpoints, WebSocket events and frontend pages. Groups talk to each other only through a few agreed contracts (listed below), so they can work in parallel against stubs. Cut lines chosen to avoid overlap:
+- **Profile vs. friends.** Identity owns the profile data, the avatar and the profile page. Social owns friends, online status and chat.
+- **Content vs. live updates.** Content owns the items users share. Social only broadcasts "new content" events to visitors.
+
+#### Split for 4 people
+
+| Group | Theme | Modules (p-days) | Mandatory items (p-days) | Total |
+|---|---|---|---|---|
+| **A. Platform and data** | Foundations everyone builds on | Frameworks front + back (8), ORM (1.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2) | **15** |
+| **B. Identity and UI kit** | Accounts and the visual identity | Standard user management (5), OAuth 2.0 (2), Custom design system (5) | Email + password auth with hashing and sessions (2.5) | **14.5** |
+| **C. Social and docs** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | README (1.5), Privacy Policy and Terms of Service (1) | **14.5** |
+| **D. Content and room** | What users share and how it is browsed | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | (none) | **12.5 + room page, hotspots, mobile menu** |
+| | | | **Total** | **56.5** |
+
+About 14 p-days (≈ 85 h) per person. D looks lighter on paper, but the room page, the hotspot-to-content mapping and the mobile menu are not in its estimate, so the real loads are close.
+
+#### Split for 5 people
+
+| Group | Theme | Modules (p-days) | Mandatory items (p-days) | Total |
+|---|---|---|---|---|
+| **A. Platform and data** | Backend foundations | Frameworks, backend half (4), ORM (1.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2), README (1.5) | **12.5** |
+| **B. Identity** | Accounts and profiles | Standard user management (5), OAuth 2.0 (2) | Email + password auth with hashing and sessions (2.5), Privacy Policy and Terms of Service (1) | **10.5** |
+| **C. Social** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | (none) | **12** |
+| **D. Content** | What users share | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | (none) | **12.5** |
+| **E. Frontend and room** | The look and the navigation | Frameworks, frontend half (4), Custom design system (5) | (none) | **9 + room page, hotspots, mobile menu** |
+| | | | **Total** | **56.5** |
+
+About 11 p-days (≈ 68 h) per person. E's real load is higher than it looks, for the same reason as D in the 4-person split.
+
+#### Contracts between groups
+
+| Provider | Consumer | What is agreed |
+|---|---|---|
+| Platform (A) | everyone | Repo layout, Docker setup, migration workflow, shared types, API error format. First deliverable: nothing else can start without it. |
+| Identity (B) | Social, Content | An authenticated-user guard and a user id on every request. Social and Content never touch the credentials tables. |
+| Design system (B in the 4-split, E in the 5-split) | everyone with pages | A small component list (buttons, inputs, cards, modal...) published early, even if unfinished. |
+| Content (D) | Social | One event, "content created" (owner id, content id, type), which Social broadcasts over WebSocket. |
+| Content (D) | Room page | The list of content types and a hotspot-to-type mapping. The same data feeds the room and the mobile menu. |
+
+#### Ownership of tables and demos
+
+- Each group owns its tables and writes its own migrations. Platform reviews them for consistency.
+- Each module has one named owner who demos it at evaluation, and a second person from another group who has reviewed it and can explain it, because every member must be able to explain the whole project (subject p. 6).
+- Suggested role mapping, to be decided by the team: Technical Lead = Platform, Project Manager and Product Owner shared between the other groups.
+
+#### What this split does not remove
+
+- **Integration at the end.** Parallel work against stubs only works if the contracts above are written down in week 1. Plan a shared integration session for each module, not one at the end.
+- **Everyone must contribute to the mandatory part** (subject p. 4). In this split, Platform, Identity and Social hold the mandatory lines. In the 4-person split, Content has none, so give D a visible share, for example the HTTPS demo or the input validation review. Make sure each member has commits there.
+- **Friends and online status** can be read by an evaluator as part of Standard user management (§5). Identity's demo then depends on Social's work, so agree that both groups show it.
+
 ## 5. Risks and caveats
 
 - **Friends overlap.** User interaction and Standard user management both include friends. An evaluator may question it. The buffer exists partly for this.
