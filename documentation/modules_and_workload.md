@@ -207,7 +207,13 @@ How to read it:
 
 ### Workload split by team size
 
-Scope: the 10 modules of the 14-point plan above, plus the mandatory items. The buffer modules are not split here. Estimates are the midpoints of the ranges (p-days, ±50%), so the totals differ slightly from the ≈47 and ≈12 above. Form and input validation (≈2 p-days) is not a separate line: each group validates its own forms and endpoints, and the cost is included in its module estimates. The room artwork, the room page and the mobile menu are not estimated (see §5).
+Scope: the 10 modules of the 14-point plan, the 4 buffer modules and the mandatory items. Estimates are the midpoints of the ranges (p-days, ±50%), so the totals differ slightly from the ≈70 above. Form and input validation (≈2 p-days) is not a separate line: each group validates its own forms and endpoints, and the cost is included in its module estimates. The room page, hotspots and mobile menu are not a module but are real work: they are counted at **≈3.5 p-days** (a rough guess with the same ±50%) so that they weigh in the balance. The room artwork is still not estimated (see §5).
+
+Buffer modules are placed by proximity to a group's core work first, then moved if a group gets too heavy:
+- **Multiple languages (i18n):** its natural home is the UI group, but that group already holds the room. The i18n system and language switcher must exist before anyone writes UI text, so it goes to the group that sets up the frontend. Every group then routes its own text through it.
+- **PWA:** offline support mostly means caching content pages and images, so it goes with Content. The manifest and service worker are small.
+- **GDPR:** it is about user data and uploads, so it goes to Content (4 people) or Identity (5 people), whichever has more room. Either way it needs every group to export and delete its own data for one user (see the contracts).
+- **Additional browsers:** the module requires documenting browser-specific limitations, which fits the docs owner (4 people). With 5 people, it goes to Platform, which can run the cross-browser tests in CI.
 
 **How the groups are built.** Each group owns one product area end to end: its database tables, API endpoints, WebSocket events and frontend pages. Groups talk to each other only through a few agreed contracts (listed below), so they can work in parallel against stubs. Cut lines chosen to avoid overlap:
 - **Profile vs. friends.** Identity owns the profile data, the avatar and the profile page. Social owns friends, online status and chat.
@@ -215,28 +221,28 @@ Scope: the 10 modules of the 14-point plan above, plus the mandatory items. The 
 
 #### Split for 4 people
 
-| Group | Theme | Modules (p-days) | Mandatory items (p-days) | Total |
-|---|---|---|---|---|
-| **A. Platform and data** | Foundations everyone builds on | Frameworks front + back (8), ORM (1.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2) | **15** |
-| **B. Identity and UI kit** | Accounts and the visual identity | Standard user management (5), OAuth 2.0 (2), Custom design system (5) | Email + password auth with hashing and sessions (2.5) | **14.5** |
-| **C. Social and docs** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | README (1.5), Privacy Policy and Terms of Service (1) | **14.5** |
-| **D. Content and room** | What users share and how it is browsed | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | (none) | **12.5 + room page, hotspots, mobile menu** |
-| | | | **Total** | **56.5** |
+| Group | Theme | Core modules (p-days) | Buffer modules (p-days) | Mandatory items (p-days) | Total |
+|---|---|---|---|---|---|
+| **A. Platform and data** | Foundations everyone builds on | Frameworks front + back (8), ORM (1.5) | Multiple languages: i18n system, switcher, translations (2.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2) | **17.5** |
+| **B. Identity, UI kit and room** | Accounts, the visual identity and the room | Standard user management (5), OAuth 2.0 (2), Custom design system (5), room page + hotspots + mobile menu (3.5, not a module) | (none) | Email + password auth with hashing and sessions (2.5) | **18** |
+| **C. Social and docs** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | Additional browsers (2.5) | README (1.5), Privacy Policy and Terms of Service (1) | **17** |
+| **D. Content** | What users share and how it is browsed | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | GDPR (3.5), PWA (2.5) | (none) | **18.5** |
+| | | | | **Total** | **71** |
 
-About 14 p-days (≈ 85 h) per person. D looks lighter on paper, but the room page, the hotspot-to-content mapping and the mobile menu are not in its estimate, so the real loads are close.
+About 17.75 p-days (≈ 107 h) per person, with groups between 17 and 18.5. The room page, hotspots and mobile menu sit with the UI kit because they are built from the same components and art. B gets no buffer module because the room and the design system already make it the most exposed group (artwork not counted). If B still overflows, D can take the content pages (lists and detail views) that the room links to.
 
 #### Split for 5 people
 
-| Group | Theme | Modules (p-days) | Mandatory items (p-days) | Total |
-|---|---|---|---|---|
-| **A. Platform and data** | Backend foundations | Frameworks, backend half (4), ORM (1.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2), README (1.5) | **12.5** |
-| **B. Identity** | Accounts and profiles | Standard user management (5), OAuth 2.0 (2) | Email + password auth with hashing and sessions (2.5), Privacy Policy and Terms of Service (1) | **10.5** |
-| **C. Social** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | (none) | **12** |
-| **D. Content** | What users share | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | (none) | **12.5** |
-| **E. Frontend and room** | The look and the navigation | Frameworks, frontend half (4), Custom design system (5) | (none) | **9 + room page, hotspots, mobile menu** |
-| | | | **Total** | **56.5** |
+| Group | Theme | Core modules (p-days) | Buffer modules (p-days) | Mandatory items (p-days) | Total |
+|---|---|---|---|---|---|
+| **A. Platform and data** | Backend foundations | Frameworks, backend half (4), ORM (1.5) | Additional browsers: cross-browser tests in CI (2.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2) | **13.5** |
+| **B. Identity** | Accounts, profiles and personal data | Standard user management (5), OAuth 2.0 (2) | GDPR (3.5) | Email + password auth with hashing and sessions (2.5), Privacy Policy and Terms of Service (1) | **14** |
+| **C. Social and docs** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | (none) | README (1.5) | **13.5** |
+| **D. Content** | What users share | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | PWA (2.5) | (none) | **15** |
+| **E. Frontend and room** | The look and the navigation | Frameworks, frontend half (4), Custom design system (5), room page + hotspots + mobile menu (3.5, not a module) | Multiple languages: i18n system, switcher, translations (2.5) | (none) | **15** |
+| | | | | **Total** | **71** |
 
-About 11 p-days (≈ 68 h) per person. E's real load is higher than it looks, for the same reason as D in the 4-person split.
+About 14.2 p-days (≈ 85 h) per person, with groups between 13.5 and 15. Changes from the 4-person split: GDPR moves to Identity (it sits next to the Privacy Policy and account deletion), i18n goes to E (the frontend owner here), and the README moves from Platform to Social to balance the loads. C gets no buffer module because it takes the README instead.
 
 #### Contracts between groups
 
@@ -246,7 +252,9 @@ About 11 p-days (≈ 68 h) per person. E's real load is higher than it looks, fo
 | Identity (B) | Social, Content | An authenticated-user guard and a user id on every request. Social and Content never touch the credentials tables. |
 | Design system (B in the 4-split, E in the 5-split) | everyone with pages | A small component list (buttons, inputs, cards, modal...) published early, even if unfinished. |
 | Content (D) | Social | One event, "content created" (owner id, content id, type), which Social broadcasts over WebSocket. |
-| Content (D) | Room page | The list of content types and a hotspot-to-type mapping. The same data feeds the room and the mobile menu. |
+| every group | GDPR owner (D in the 4-split, B in the 5-split) | For one user: export the data of its own tables, and delete it. The GDPR owner only orchestrates and sends the confirmation emails. |
+| i18n owner (A in the 4-split, E in the 5-split) | everyone with pages | The translation setup, ready before UI text is written. Each group adds its own keys. |
+| Content (D) | Room group (B in the 4-split, E in the 5-split) | The list of content types and the routes of their pages. The room group owns the hotspot-to-type mapping, and the same data feeds the room and the mobile menu. |
 
 #### Ownership of tables and demos
 
@@ -257,7 +265,7 @@ About 11 p-days (≈ 68 h) per person. E's real load is higher than it looks, fo
 #### What this split does not remove
 
 - **Integration at the end.** Parallel work against stubs only works if the contracts above are written down in week 1. Plan a shared integration session for each module, not one at the end.
-- **Everyone must contribute to the mandatory part** (subject p. 4). In this split, Platform, Identity and Social hold the mandatory lines. In the 4-person split, Content has none, so give D a visible share, for example the HTTPS demo or the input validation review. Make sure each member has commits there.
+- **Everyone must contribute to the mandatory part** (subject p. 4). Content holds no mandatory line in either split, and neither does Frontend (E) in the 5-person split. Give them a visible share, for example the HTTPS demo or the input validation review. Make sure each member has commits there.
 - **Friends and online status** can be read by an evaluator as part of Standard user management (§5). Identity's demo then depends on Social's work, so agree that both groups show it.
 
 ## 5. Risks and caveats
