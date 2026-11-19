@@ -1,0 +1,4 @@
+node_modules/
+
+# LibreOffice lock files, created while a document is open
+.~lock.*#
