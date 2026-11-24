@@ -1,3 +1,6 @@
+# What is this doc
+
+Personal notes of Benjamin. Not everything is necessarily up to date as of 24th November. 
 
 # Questions for experts
 

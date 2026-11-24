@@ -1,3 +1,8 @@
+# What is this doc
+
+Questions to send to potential users to better design the app. For the Product Manager (PM) role by Benjamin
+
+# Questions
 
 [Quick presentation of the project, with a draft picture]
 
