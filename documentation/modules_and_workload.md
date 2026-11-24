@@ -1,292 +1,173 @@
-# Module analysis
+# What is this doc
 
-Sources: `en.subject.transcenDANCE.pdf` (v21.1), `notes.md`, `ft_transcendence Architecture and Tech Stack Proposal-1.pdf` (Merve, Nov 10 2026; "the proposal" below).
+The modules we chose for the project and the estimated workload, for a team of 4. The analysis of every possible module (and why the others were not chosen) is in [modules_analysis.md](modules_analysis.md).
 
-Goal: reach **14 points** (Major = 2, Minor = 1) with modules that fit our idea: a **showcase room** where each user shares books, films, music, photos, games and paintings through clickable objects in a cosy 2D pixel-art room. Aim a few points above 14, because a module that is not fully working at evaluation scores 0.
+Sources: `en.subject.transcenDANCE.pdf` (v21.1), [modules_analysis.md](modules_analysis.md), `ft_transcendence Architecture and Tech Stack Proposal-1.pdf` (Merve, Nov 10 2026). Last update: Nov 24 2026.
 
-## 1. How to read the tables
+# Modules and workload
 
-**Relevance** (to our idea)
-- **Essential**: the product does not work without it, or it is already mandatory.
-- **High**: clear product value and a natural fit.
-- **Medium**: useful, but we would be adding it mostly for points.
-- **Low**: forced fit; only worth it if points are missing.
-- **N/A**: needs a game or a technology we do not have (the subject says these modules require at least one game).
+Goal: reach the **14 required points** (Major = 2, Minor = 1) with modules that fit our idea, a **showcase room** where each member shares books, films, music, photos, games and paintings through clickable objects in a cosy 2D pixel-art room. On top of that, we plan **7 buffer points**: they protect the 14 if a module fails at evaluation, and they earn the bonus (5 points at most).
 
-**Time** is a rough estimate in person-days (p-days) for one developer who is still learning the stack. **1 p-day = 6 hours of focused work** (not 8, because meetings, debugging detours and context switching eat into a day). It includes tests and being demo-ready, and has a margin of about ±50%. It is not a promise.
+## 1. How to read the estimates
 
-**Complexity**: Low, Med or High. It covers the technical difficulty and also the risk of a partial result, which scores 0.
+- **1 p-day (person-day) = 6 hours of focused work**, for one developer who is still learning the stack. It includes tests and being demo-ready.
+- Each module has a range (e.g. 4-6). Totals use the **midpoint** (5). Every figure has a margin of about ±50%: it is a planning aid, not a promise.
+- Hours per person = p-days × 6 ÷ 4 people. Calendar weeks assume the whole team works in parallel, 5 days a week, and add a +30% margin for integration, blocked dependencies and evaluation preparation.
 
-**In proposal**: where the module appears in the proposal: Core (14-point plan), Buffer, Stretch, or "-" if it is not mentioned.
+## 2. Chosen modules
 
-## 2. All modules evaluated
+### 2.1 Core: the 14 required points
 
-### Web
+| Module | Type | Pts | p-days (range) | Used in totals | What it covers |
+|---|---|---|---|---|---|
+| Frameworks, front + back | Major | 2 | 6-10 | 8 | React + NestJS, both in TypeScript: project setup, shared types, auth session wiring, learning curve |
+| Real-time features (WebSockets) | Major | 2 | 4-6 | 5 | Presence in a room, live chat, visitors seeing new contents appear |
+| User interaction | Major | 2 | 6-8 | 7 | Chat, profiles, friends |
+| Standard user management | Major | 2 | 4-6 | 5 | Profile editing, avatar, friends with online status, profile page |
+| ORM | Minor | 1 | 1-2 | 1.5 | Database access through typed models |
+| File upload and management | Minor | 1 | 4-6 | 5 | Photos and artworks: validation on both sides, access control, preview, progress, delete |
+| OAuth 2.0 | Minor | 1 | 1-3 | 2 | Login with 42 (or Google, GitHub) |
+| Custom design system | Minor | 1 | 4-6 | 5 | The cosy pixel-art identity: 10+ reusable components, palette, typography, icons |
+| Advanced search | Minor | 1 | 3-4 | 3.5 | Find rooms, members and items by category or tag, with filters, sorting and pagination |
+| Image recognition and tagging | Minor | 1 | 3-5 | 4 | Automatic tags on uploaded photos and paintings, which feed the search |
+| **Total** | | **14** | **36-56** | **46** | |
 
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| Frontend + backend framework (Major) | 2 | Essential | 6-10 (stack setup and learning, shared by the team) | Med | Core | Hypothesis: React + NestJS, both in TypeScript. No feature work of its own, but the setup is real: scaffolding both sides, API contract and shared types, auth session wiring, Nest's learning curve (modules, dependency injection, decorators, which are hard to explain line by line at evaluation). One language on both sides keeps this lower than a new-language backend. Counts once for both, so do not also claim the minor frontend and minor backend modules. |
-| Real-time features, WebSockets | 2 | High | 4-6 (was 5-8) | Med | Core | Presence in a room, live chat, and visitors seeing new contents appear. Reconnect logic is the hard part. We have ft_irc experience. Lowered from 5-8 because there is no object-placement sync and no stale-layout conflict handling. The module is narrower, so the demo must still show updates across clients, graceful disconnects and broadcasting. |
-| User interaction (chat, profile, friends) | 2 | High | 6-8 | Med | Core | Needed anyway for sharing between members. Overlaps with standard user management on friends (see §5). |
-| Public API (key, rate limit, docs, 5+ endpoints) | 2 | Medium | 5-7 | Med | Stretch | Natural fit: "read and manage showcase contents". The OpenAPI docs can double as documentation. |
-| ORM | 1 | High | 1-2 | Low | Core | Almost free once the stack is chosen. |
-| File upload and management | 1 | Essential | 4-6 | Med | Core | Needed for artworks and photos. Needs validation on both sides, access control, preview, progress bar and delete. |
-| Custom design system (10+ components) | 1 | High | 4-6 | Low-Med | Core | The cosy pixel-art identity is part of the product. A palette, typography and icons are needed anyway. |
-| Advanced search (filters, sort, pagination) | 1 | Medium | 3-4 | Low-Med | Buffer | Find rooms, users and items by category or tag. Pairs well with image tagging. With a fixed room, filtered lists and search are the main way to browse content, so this module carries more of the product. |
-| Notification system | 1 | Medium | 3-4 | Low-Med | Buffer | The wording covers ALL create, update and delete actions, so we must agree the scope first. |
-| Progressive Web App | 1 | Medium-High | 2-3 | Low-Med | not listed | Fits the mobile concern in the notes. Needs a manifest, a service worker and offline support. |
-| Server-Side Rendering | 1 | Low-Med | 3-5 | Med | not listed | Mostly free with Next.js, painful with Vite. Useful for link previews of shared rooms. |
-| Real-time collaborative features | 1 | Low | 4-6 | Med-High | Buffer | Our MVP decision is that the room is not editable, so there is little to collaborate on. |
+The proposal planned an Advanced 3D room (2 pts). We build the room in 2D, so Advanced search + Image recognition replace it: the tags feed the search, so the two modules support each other.
 
-### Accessibility and internationalization
+### 2.2 Buffer: 7 extra points
 
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| WCAG 2.1 AA, screen readers, keyboard | 2 | Medium-High | 6-10 | Med-High | not listed | The 2D room with real buttons and a list-menu fallback makes this plausible. A full audit is the cost. |
-| Multiple languages (3) | 1 | High | 2-3 | Low | Buffer | Cheap if all text goes through i18n from day one. The notes are already FR/EN. |
-| RTL language | 1 | Medium | 2-4 | Med | not listed | Layout mirroring is needed, and a mirrored pixel-art room is awkward. |
-| Additional browsers (2) | 1 | Medium | 2-3 | Low | Buffer | Lower risk in 2D than in WebGL. |
+| Module | Type | Pts | p-days (range) | Used in totals | What it covers |
+|---|---|---|---|---|---|
+| Multiple languages | Minor | 1 | 2-3 | 2.5 | At least 3 languages with a switcher; all UI text goes through i18n from day one |
+| Progressive Web App | Minor | 1 | 2-3 | 2.5 | Installable app with offline support (manifest, service worker) |
+| GDPR compliance | Minor | 1 | 3-4 | 3.5 | Members can request, export and delete their data, with email confirmation |
+| Additional browsers | Minor | 1 | 2-3 | 2.5 | Full support for 2 more browsers (e.g. Firefox, Safari), limits documented |
+| Notification system | Minor | 1 | 3-4 | 3.5 | A notification for every create, update and delete action, shown live. Scope to agree first |
+| Two-factor authentication (2FA) | Minor | 1 | 2-3 | 2.5 | A second login step with a code from an authenticator app (TOTP) |
+| Content moderation AI | Minor | 1 | 3-5 | 4 | Uploads and texts checked automatically; flagged content hidden, author warned |
+| **Total** | | **7** | **18-25** | **21** | |
 
-### User management
+### 2.3 Stretch: only if there is time (not counted)
 
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| Standard user management | 2 | Essential | 4-6 | Med | Core | Profile editing, avatar, friends with online status, profile page. |
-| OAuth 2.0 | 1 | High | 1-3 | Low-Med | Core | The 42 login is the obvious provider. |
-| 2FA | 1 | Medium | 2-3 | Low-Med | Buffer | TOTP libraries exist. |
-| Advanced permissions (roles, CRUD users) | 2 | Medium | 5-7 | Med | not listed | Maps to admin, moderator, user and guest, and to visibility rules. |
-| Organization system | 2 | Low | 5-7 | Med | not listed | Could be "clubs" or shared rooms, but it is a forced fit. |
-| User activity analytics dashboard | 1 | Low-Med | 3-4 | Low-Med | not listed | E.g. visits to my room. Needs an event log. |
-| Game statistics and match history | 1 | N/A | - | - | - | Requires a game. |
+| Item | Type | Pts | p-days (range) | Who | Notes |
+|---|---|---|---|---|---|
+| Advanced 3D graphics: a 3D version of the room | Major | 2 | 15-25 (≈ 20) | Matthieu | Reuses the hotspot data of the 2D room. Start only once the core is demo-ready. See §3 for when it actually adds points. |
+| Galaxy menu | not a module | - | not estimated | - | Animated menu where the category icons orbit like planets. The MVP ships a simple text menu (see [front.md](front.md)). |
 
-### Artificial intelligence
+## 3. Bonus rules and how we use the buffer
 
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| Image recognition and tagging | 1 | High | 3-5 | Med | Stretch | Tags uploaded artworks and photos and feeds search. Already named in our meeting notes. Hosted API or a small model; may need a Python container if the backend is not Python. |
-| Recommendation system (ML) | 2 | High (idea), costly | 8-12 | High | Open question | "Rooms you might like" is a great fit but the hardest AI module. Needs data and a continuous improvement story. |
-| Content moderation AI | 1 | Medium | 3-5 | Med | Open question | Public uploads make this legitimate. An external moderation API is the cheap route. |
-| Sentiment analysis | 1 | Low-Med | 2-3 | Low-Med | not listed | E.g. on chat messages or content descriptions. |
-| Voice / speech integration | 1 | Low-Med | 3-4 | Med | not listed | Accessibility angle (text-to-speech of descriptions). |
-| LLM system interface | 2 | Low-Med | 6-8 | High | not listed | Streaming, error handling and rate limiting are required. No natural use for it in the product. |
-| RAG | 2 | Low | 8-10 | High | not listed | No dataset to query. |
-| AI opponent | 2 | N/A | - | - | - | Requires a game. |
+What the subject says (p. 30):
+- The bonus is considered **only if the 14 required points are validated**.
+- Each module validated beyond the 14 points counts as bonus: **Major = 2, Minor = 1**.
+- **5 bonus points at most** (e.g. 5 minors, or 2 majors + 1 minor).
+- Each extra module must be fully functional, meet the module requirements, add real value to the project, and be **justified in the README**.
 
-### Cybersecurity
+What it means for us (our reading of the rules):
+- We plan 14 + 7 = **21 points**, and at most **19** can count (14 + 5).
+- If every module passes, 5 buffer points count as bonus and **2 are spare**.
+- If a module fails, the buffer first fills the 14 points, and the rest still counts as bonus. We can lose up to 2 points (one Major or two Minors) and still reach 14 + 5.
+- The 3D stretch (2 pts) only adds points if fewer than 5 extra points are validated. It is a product choice more than a points choice.
+- Each buffer module needs a README justification in product terms. Ours have one: protecting personal data (GDPR), protecting accounts (2FA), keeping public uploads clean (moderation), following activity (notifications), reaching more members (languages, browsers, mobile app).
 
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| WAF/ModSecurity (hardened) + HashiCorp Vault | 2 | Low-Med | 6-8 | High | not listed | Product-independent infra work, with a risk of breaking the app with strict rules. |
+## 4. Mandatory part
 
-### Gaming and user experience
+The mandatory part applies whatever modules are chosen.
 
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| Advanced 3D graphics (Three.js / Babylon) | 2 | Low (we chose 2D) | 15-25 | High | Core | The proposal's room is 3D. Our notes choose 2D, so these 2 points must be replaced (see §4). |
-| Gamification (3 of: achievements, badges, leaderboards, XP, daily challenges, rewards) | 1 | Medium | 4-6 | Med | not listed | Does not need a game. E.g. "collector" badges and a profile-completion level. Keep it to 3 well-done features. |
-| Advanced chat | 1 | Low-Med | 3-5 | Med | not listed | Needs basic chat first. Several bullets mention games (invites, tournament notices), so an evaluator may question it. |
-| Web-based game, remote players, multiplayer 3+, second game, tournament, customization, spectator | 2 / 2 / 2 / 2 / 1 / 1 / 1 | N/A | - | - | - | We build no game. |
-
-### DevOps
-
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| Health check, status page, automated backups and DR | 1 | Medium | 2-3 | Low-Med | not listed | A cheap infra point; backups of the DB and the media volume make sense for user content. |
-| Prometheus + Grafana | 2 | Low (product) | 4-6 | Med | not listed | Independent of product code. Fewer moving parts than ELK. |
-| ELK log management | 2 | Low (product) | 5-8 | High | not listed | Memory hungry (Elasticsearch). Independent of product code. |
-| Backend as microservices | 2 | Low (and rejected) | 8-12 | High | Rejected | Our notes and the proposal both choose a modular monolith. |
-
-### Data and analytics
-
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| GDPR compliance | 1 | High | 3-4 | Med | Buffer | We store personal data and uploads, and Privacy Policy pages are mandatory anyway. Needs outgoing email for confirmations. |
-| Data export and import | 1 | Medium | 3-4 | Low-Med | not listed | "Export my showcase" is a reasonable product feature. |
-| Advanced analytics dashboard | 2 | Low-Med | 6-8 | Med | not listed | Charts, real-time updates, PDF/CSV export. |
-
-### Blockchain
-
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| Tournament scores on blockchain / ICP backend | 2 / 1 | N/A | - | - | - | No tournaments. The ICP backend is also incompatible with SSR. |
-
-### Modules of choice (candidates, to be justified in the README)
-
-| Module | Pts | Relevance | Time (p-days) | Complexity | In proposal | Notes |
-|---|---|---|---|---|---|---|
-| Room editor (drag and drop objects, save layouts) | 2 | Post-MVP | 10-15 | High | Stretch | Out of scope: the MVP room is not editable. The proposal also flags it as refusable. It would need the `room_objects` table and a layout version (see [database_schema.md](database_schema.md)). Do not count it in the 14. |
-| External media embeds (YouTube / Spotify / oEmbed from the clickable objects) | 1 | High | 3-4 | Med | not listed | This is the core of our idea (vinyl player opens a playlist). Evaluator risk: it may be judged too small. Needs a solid README justification. |
-
-## 3. Comparison with the proposal
-
-| Topic | Proposal | Our notes | Verdict |
-|---|---|---|---|
-| Rendering | 3D room (React Three Fiber), 2D as escape route | 2D pixel art, hotspots on an image | **Diverges.** Costs the Advanced 3D module (2 pts). |
-| Architecture | Modular monolith | Same ("Amandine said microservices are a pain") | Agree. |
-| Frontend | React + TypeScript | "Not for me", friends suggest Next.js or Vite + React Router, TypeScript | Working hypothesis: React + TypeScript (same as the proposal, minus Three.js). |
-| Backend | Go + Gin + GORM | Friend suggests Adonis or Express in TypeScript | Working hypothesis: NestJS + TypeScript, which is the proposal's own "lowest risk" candidate A without the 3D layer. One language on both sides, shared types, WebSocket gateways and validation built in. |
-| Room editing | "Place it in the room" in the minimum product | Not editable in the MVP | Diverges. It is a scope cut. It removes the room-editor stretch, the `catalog_items` and `room_objects` tables, and the room layout version (see [database_schema.md](database_schema.md)). |
-| Real-time | One WebSocket hub per room, broadcasting presence, object changes, guestbook entries and chat | Same hub per room | Agree, but narrower: no object-change broadcast and no guestbook. Presence, chat and new contents remain. |
-| Image recognition | Stretch idea | Listed in the meeting notes | Agree, and it is worth promoting into the plan. |
-| Core modules | 9 modules = 14 pts | n/a | 8 of the 9 stay valid. Only Advanced 3D falls away. |
-
-Proposal Core plan under our 2D decision:
-
-| Proposal core module | Pts | Still valid in 2D? |
+| Mandatory item | p-days (range) | Used in totals |
 |---|---|---|
-| Frameworks (front + back) | 2 | Yes |
-| Real-time features | 2 | Yes |
-| User interaction | 2 | Yes |
-| Standard user management | 2 | Yes |
-| **Advanced 3D graphics** | **2** | **No: replace** |
-| ORM | 1 | Yes |
-| File upload | 1 | Yes |
-| OAuth 2.0 | 1 | Yes |
-| Custom design system | 1 | Yes |
-| **Total still valid** | **12** | Need 2 more points |
+| Docker Compose, single-command run, HTTPS (reverse proxy), CI | 3-4 | 3.5 |
+| Database schema and migrations | 2 | 2 |
+| Email + password auth with salted hashing, sessions | 2-3 | 2.5 |
+| Form and input validation on both sides | 2 | 2 |
+| Privacy Policy and Terms of Service (real content) | 1 | 1 |
+| README with all required sections | 1-2 | 1.5 |
+| **Total** | **11-14** | **12.5** |
 
-## 4. Recommended plan for the 2D showcase room
+Product work that is neither a module nor mandatory, but needed: **room page, hotspots and text menu ≈ 3.5 p-days** (a rough guess). The room artwork is not estimated.
 
-The proposal's own 2D fallback is Advanced search + Notification system, or the Public API. Image recognition + Advanced search is a better fit here: the tags feed the search, so the two modules support each other.
+## 5. Total workload for 4 people
 
-| Block | Module | Pts | Est. p-days |
-|---|---|---|---|
-| Core | Frameworks front + back (React + NestJS, TypeScript) | 2 | 6-10 |
-| Core | Real-time features | 2 | 4-6 |
-| Core | User interaction | 2 | 6-8 |
-| Core | Standard user management | 2 | 4-6 |
-| Core | ORM | 1 | 1-2 |
-| Core | File upload | 1 | 4-6 |
-| Core | OAuth 2.0 | 1 | 1-3 |
-| Core | Custom design system | 1 | 4-6 |
-| Replaces 3D | Advanced search | 1 | 3-4 |
-| Replaces 3D | Image recognition and tagging | 1 | 3-5 |
-| | **Total** | **14** | **≈ 47** |
-| Buffer | Multiple languages (3) | 1 | 2-3 |
-| Buffer | PWA | 1 | 2-3 |
-| Buffer | GDPR | 1 | 3-4 |
-| Buffer | Additional browsers | 1 | 2-3 |
-| | **Buffer total** | **4** | **≈ 11** |
+| Scenario | Points | p-days | Per person | Hours per person | Weeks at 6 h/day (+30%) | Weeks at 4 h/day (+30%) |
+|---|---|---|---|---|---|---|
+| Required part only: mandatory + 14 core points + room page | 14 | 62 | 15.5 | ≈ 93 | 4.0 | 6.0 |
+| With the full bonus: + the 5 cheapest buffer modules | 14 + 5 | 75.5 | ≈ 18.9 | ≈ 113 | 4.9 | 7.4 |
+| **Full plan, our target: + all 7 buffer modules** | **14 + 7** | **83** | **≈ 20.75** | **≈ 125** | **5.4** | **8.1** |
+| Stretch: 3D room (Matthieu, on top of his share) | + 2 | + 20 | - | + 120 for Matthieu | about 4 more weeks for one person at 6 h/day | |
 
-The mandatory part is a separate cost that applies whatever modules are chosen:
+How the figures are built:
+- Required part: 46 (core) + 12.5 (mandatory) + 3.5 (room page) = 62 p-days.
+- The 5 cheapest buffer modules: multiple languages, PWA, 2FA, additional browsers (2.5 each) + GDPR or notifications (3.5) = 13.5 p-days.
+- Full plan: 62 + 21 (all buffer modules) = 83 p-days.
+- Weeks: p-days × 6 h ÷ (4 people × hours per day × 5 days), then +30%. Example: 83 p-days at 6 h/day = 4.15 weeks, 5.4 with the margin.
 
-| Mandatory item | Est. p-days |
-|---|---|
-| Docker Compose, single-command run, HTTPS (reverse proxy), CI | 3-4 |
-| Database schema and migrations | 2 |
-| Email + password auth with salted hashing, sessions | 2-3 |
-| Form and input validation on both sides | 2 |
-| Privacy Policy and Terms of Service (real content) | 1 |
-| README with all required sections | 1-2 |
-| **Mandatory total** | **≈ 12** |
+Not included: the room artwork, the galaxy menu, and learning time beyond what each module estimate already contains.
 
-Full picture: about 47 (14-point plan) + 11 (buffer) + 12 (mandatory) ≈ **70 person-days**, so roughly 14-18 per person for a team of 4-5. This is a rough estimate with the same ±50% margin as the rest, and it excludes the room artwork. Candidates to swap in or add: External media embeds (1), Gamification (1), Health check and backups (1), WCAG (2, larger).
+## 6. Workload split for 4 people
 
-### Calendar estimates by team size and daily hours
+### 6.1 How the groups are built
 
-Workload in hours (1 p-day = 6 h): Core ≈ 47 p-days = **282 h**, Buffer ≈ 11 p-days = **66 h**, Mandatory ≈ 12 p-days = **72 h**, Total ≈ 70 p-days = **420 h**.
-
-Each cell is the number of **working days** the whole team needs, assuming everyone works that many focused hours per day and the work splits perfectly between people.
-
-| Block | Hours | 4 people, 6 h/day | 4 people, 4 h/day | 5 people, 6 h/day | 5 people, 4 h/day |
-|---|---|---|---|---|---|
-| Core modules (14 pts) | 282 | 11.8 | 17.6 | 9.4 | 14.1 |
-| Buffer modules (4 pts) | 66 | 2.8 | 4.1 | 2.2 | 3.3 |
-| Mandatory part | 72 | 3.0 | 4.5 | 2.4 | 3.6 |
-| **Total (working days)** | **420** | **17.5** | **26.3** | **14.0** | **21.0** |
-| Total in weeks (5 working days) | | 3.5 | 5.3 | 2.8 | 4.2 |
-| Hours per person | | 105 | 105 | 84 | 84 |
-| Total in weeks with a +30% margin | | 4.6 | 6.8 | 3.6 | 5.5 |
-
-How to read it:
-- The three block rows add up to the total row (up to rounding).
-- Hours per person only depends on team size. A lower daily budget stretches the calendar, not the effort.
-- The +30% margin row is my assumption, not a measurement. Real projects lose time to integration, blocked dependencies, merge conflicts and evaluation preparation, and the underlying estimates already carry ±50%. Plan on that row, not on the plain total.
-- Not included: the room artwork, learning time beyond what is already in each estimate, and any module added from the "swap in" list.
-- The proposal warns that a fourth member joining late or not at all is a risk, and suggests planning the core points for three people. With 3 people at 6 h/day, the total would be about 23.3 working days (420 / 18), before any margin.
-
-### Workload split by team size
-
-Scope: the 10 modules of the 14-point plan, the 4 buffer modules and the mandatory items. Estimates are the midpoints of the ranges (p-days, ±50%), so the totals differ slightly from the ≈70 above. Form and input validation (≈2 p-days) is not a separate line: each group validates its own forms and endpoints, and the cost is included in its module estimates. The room page, hotspots and mobile menu are not a module but are real work: they are counted at **≈3.5 p-days** (a rough guess with the same ±50%) so that they weigh in the balance. The room artwork is still not estimated (see §5).
-
-Buffer modules are placed by proximity to a group's core work first, then moved if a group gets too heavy:
-- **Multiple languages (i18n):** its natural home is the UI group, but that group already holds the room. The i18n system and language switcher must exist before anyone writes UI text, so it goes to the group that sets up the frontend. Every group then routes its own text through it.
-- **PWA:** offline support mostly means caching content pages and images, so it goes with Content. The manifest and service worker are small.
-- **GDPR:** it is about user data and uploads, so it goes to Content (4 people) or Identity (5 people), whichever has more room. Either way it needs every group to export and delete its own data for one user (see the contracts).
-- **Additional browsers:** the module requires documenting browser-specific limitations, which fits the docs owner (4 people). With 5 people, it goes to Platform, which can run the cross-browser tests in CI.
-
-**How the groups are built.** Each group owns one product area end to end: its database tables, API endpoints, WebSocket events and frontend pages. Groups talk to each other only through a few agreed contracts (listed below), so they can work in parallel against stubs. Cut lines chosen to avoid overlap:
+Each group owns one product area end to end: its database tables, API endpoints, WebSocket events and frontend pages. Groups talk to each other only through a few agreed contracts (§6.3), so they can work in parallel against stubs. Cut lines chosen to avoid overlap:
 - **Profile vs. friends.** Identity owns the profile data, the avatar and the profile page. Social owns friends, online status and chat.
-- **Content vs. live updates.** Content owns the items users share. Social only broadcasts "new content" events to visitors.
+- **Content vs. live updates.** Content owns the items users share. Social broadcasts the changes and turns them into notifications.
 
-#### Split for 4 people
+Buffer modules go to the group whose core work they extend, then move if a group gets too heavy:
+- **Multiple languages → A.** The i18n setup must exist before anyone writes UI text, and A sets up the frontend. Group B, its natural home, already holds the room.
+- **PWA → A.** The manifest and service worker are build configuration. It moved from Content to make room for moderation.
+- **2FA → B.** It extends the login flow that Identity owns.
+- **Notifications → C.** They are delivered live over the WebSocket hub that Social owns.
+- **Additional browsers → C.** The module requires documenting browser limits, which fits the docs owner.
+- **GDPR → D.** It is about user data and uploads. Every group exports and deletes its own tables (§6.3).
+- **Content moderation AI → D.** It runs on the same upload pipeline as image recognition, and can share the same service call.
 
-| Group | Theme | Core modules (p-days) | Buffer modules (p-days) | Mandatory items (p-days) | Total |
-|---|---|---|---|---|---|
-| **A. Platform and data** | Foundations everyone builds on | Frameworks front + back (8), ORM (1.5) | Multiple languages: i18n system, switcher, translations (2.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2) | **17.5** |
-| **B. Identity, UI kit and room** | Accounts, the visual identity and the room | Standard user management (5), OAuth 2.0 (2), Custom design system (5), room page + hotspots + mobile menu (3.5, not a module) | (none) | Email + password auth with hashing and sessions (2.5) | **18** |
-| **C. Social and docs** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | Additional browsers (2.5) | README (1.5), Privacy Policy and Terms of Service (1) | **17** |
-| **D. Content** | What users share and how it is browsed | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | GDPR (3.5), PWA (2.5) | (none) | **18.5** |
-| | | | | **Total** | **71** |
+### 6.2 The split
 
-About 17.75 p-days (≈ 107 h) per person, with groups between 17 and 18.5. The room page, hotspots and mobile menu sit with the UI kit because they are built from the same components and art. B gets no buffer module because the room and the design system already make it the most exposed group (artwork not counted). If B still overflows, D can take the content pages (lists and detail views) that the room links to.
+| Group | Owner | Theme | Core modules (p-days) | Buffer modules (p-days) | Mandatory items (p-days) | Total |
+|---|---|---|---|---|---|---|
+| **A. Platform and data** | Merve | Foundations everyone builds on | Frameworks front + back (8), ORM (1.5) | Multiple languages (2.5), PWA (2.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2), validation of its own forms (0.5) | **20.5** |
+| **B. Identity, UI kit and room** | Benjamin | Accounts, the visual identity and the room | Standard user management (5), OAuth 2.0 (2), Custom design system (5), room page + hotspots + text menu (3.5, not a module) | 2FA (2.5) | Email + password auth (2.5), validation of its own forms (0.5) | **21** |
+| **C. Social and docs** | to be decided | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | Notifications (3.5), Additional browsers (2.5) | README (1.5), Privacy Policy and Terms of Service (1), validation of its own forms (0.5) | **21** |
+| **D. Content** | Samira | What users share and how it is browsed | File upload (5), Image recognition (4), Advanced search (3.5) | GDPR (3.5), Content moderation AI (4) | Validation of its own forms (0.5) | **20.5** |
+| | | | | | **Total** | **83** |
 
-#### Split for 5 people
+About **20.75 p-days (≈ 125 h) per person**, with groups between 20.5 and 21. The 2 p-days of form validation are split evenly (0.5 per group), since each group validates its own forms and endpoints. Group B is the most exposed: the room artwork is not counted. If it overflows, D can take the content pages (lists and detail views) that the room links to. The 3D stretch comes on top, for Matthieu, only once the core is demo-ready.
 
-| Group | Theme | Core modules (p-days) | Buffer modules (p-days) | Mandatory items (p-days) | Total |
-|---|---|---|---|---|---|
-| **A. Platform and data** | Backend foundations | Frameworks, backend half (4), ORM (1.5) | Additional browsers: cross-browser tests in CI (2.5) | Docker Compose + HTTPS + CI (3.5), database schema and migrations (2) | **13.5** |
-| **B. Identity** | Accounts, profiles and personal data | Standard user management (5), OAuth 2.0 (2) | GDPR (3.5) | Email + password auth with hashing and sessions (2.5), Privacy Policy and Terms of Service (1) | **14** |
-| **C. Social and docs** | Everything live between users | Real-time features (5), User interaction: chat, friends (7) | (none) | README (1.5) | **13.5** |
-| **D. Content** | What users share | File upload (5), Image recognition and tagging (4), Advanced search (3.5) | PWA (2.5) | (none) | **15** |
-| **E. Frontend and room** | The look and the navigation | Frameworks, frontend half (4), Custom design system (5), room page + hotspots + mobile menu (3.5, not a module) | Multiple languages: i18n system, switcher, translations (2.5) | (none) | **15** |
-| | | | | **Total** | **71** |
-
-About 14.2 p-days (≈ 85 h) per person, with groups between 13.5 and 15. Changes from the 4-person split: GDPR moves to Identity (it sits next to the Privacy Policy and account deletion), i18n goes to E (the frontend owner here), and the README moves from Platform to Social to balance the loads. C gets no buffer module because it takes the README instead.
-
-#### Contracts between groups
+### 6.3 Contracts between groups
 
 | Provider | Consumer | What is agreed |
 |---|---|---|
 | Platform (A) | everyone | Repo layout, Docker setup, migration workflow, shared types, API error format. First deliverable: nothing else can start without it. |
 | Identity (B) | Social, Content | An authenticated-user guard and a user id on every request. Social and Content never touch the credentials tables. |
-| Design system (B in the 4-split, E in the 5-split) | everyone with pages | A small component list (buttons, inputs, cards, modal...) published early, even if unfinished. |
-| Content (D) | Social | One event, "content created" (owner id, content id, type), which Social broadcasts over WebSocket. |
-| every group | GDPR owner (D in the 4-split, B in the 5-split) | For one user: export the data of its own tables, and delete it. The GDPR owner only orchestrates and sends the confirmation emails. |
-| i18n owner (A in the 4-split, E in the 5-split) | everyone with pages | The translation setup, ready before UI text is written. Each group adds its own keys. |
-| Content (D) | Room group (B in the 4-split, E in the 5-split) | The list of content types and the routes of their pages. The room group owns the hotspot-to-type mapping, and the same data feeds the room and the mobile menu. |
+| Design system (B) | everyone with pages | A small component list (buttons, inputs, cards, modal...) published early, even if unfinished. |
+| every group | Social (C) | One event for each create, update and delete (who, what, which item). Social broadcasts it live and turns it into notifications. |
+| every group | GDPR owner (D) | For one user: export the data of its own tables, and delete it. The GDPR owner only orchestrates and sends the confirmation emails. |
+| i18n owner (A) | everyone with pages | The translation setup, ready before UI text is written. Each group adds its own keys. |
+| Content (D) | Room (B) | The list of content types and the routes of their pages. The room group owns the hotspot-to-type mapping, and the same data feeds the room and the text menu. |
 
-#### Ownership of tables and demos
+### 6.4 Ownership of tables and demos
 
 - Each group owns its tables and writes its own migrations. Platform reviews them for consistency.
 - Each module has one named owner who demos it at evaluation, and a second person from another group who has reviewed it and can explain it, because every member must be able to explain the whole project (subject p. 6).
 - Suggested role mapping, to be decided by the team: Technical Lead = Platform, Project Manager and Product Owner shared between the other groups.
 
-#### What this split does not remove
+### 6.5 What this split does not remove
 
-- **Integration at the end.** Parallel work against stubs only works if the contracts above are written down in week 1. Plan a shared integration session for each module, not one at the end.
-- **Everyone must contribute to the mandatory part** (subject p. 4). Content holds no mandatory line in either split, and neither does Frontend (E) in the 5-person split. Give them a visible share, for example the HTTPS demo or the input validation review. Make sure each member has commits there.
-- **Friends and online status** can be read by an evaluator as part of Standard user management (§5). Identity's demo then depends on Social's work, so agree that both groups show it.
+- **Integration.** Parallel work against stubs only works if the contracts above are written down in week 1. Plan a shared integration session for each module, not one at the end.
+- **Everyone must contribute to the mandatory part** (subject p. 4). Every group validates its own forms, but Content holds nothing else. Give it a visible share as well, for example the HTTPS demo. Make sure each member has commits there.
+- **Friends and online status** can be read by an evaluator as part of Standard user management. Identity's demo then depends on Social's work, so agree that both groups show it.
 
-## 5. Risks and caveats
+## 7. Risks and caveats
 
 - **Friends overlap.** User interaction and Standard user management both include friends. An evaluator may question it. The buffer exists partly for this.
-- **Image recognition vs. the stack.** With NestJS, either call a hosted vision API (simplest), run a small Python container next to the backend, or use a Node-based model runtime (heavier to set up and explain). Decide before starting.
+- **AI services vs. the stack.** Image recognition and content moderation both need a model. With NestJS, either call a hosted API (simplest, and one provider can do both), run a small Python container next to the backend, or use a Node-based model runtime (heavier to set up and explain). Decide before starting. A hosted API must be mentioned in the Privacy Policy.
 - **NestJS at evaluation.** Decorators and dependency injection hide a lot of behaviour. Everyone must be able to explain their part, so budget review time and avoid generated code nobody can walk through.
-- **Notification scope.** The wording says "all creation, update, and deletion actions". Agree the exact scope with the evaluators' reading in mind, or skip it.
-- **Custom modules can be refused** with 0 points. Keep them out of the 14.
-- **2D art cost.** The proposal says 2D needs good artwork to avoid looking like a plain gallery. Budget time for the room illustration (not in the estimates above).
-- **A fixed room is thin on its own.** With no placeable objects, the depth of the product comes from the contents: well-modelled types and attributes, the media integration, search and tags. Invest there. Also plan the mobile fallback (a simple menu of the same hotspots) from the start, since the hotspot-to-type mapping can feed both.
-- **Multi-user demo without a layout conflict story.** The proposal's version number on room layouts was its answer to concurrent edits. Without it, show concurrency another way: unique constraints on sign-ups and friend requests, and two users adding contents or sending chat messages at the same time while a visitor sees live updates.
+- **Notification scope.** The wording says "all creation, update, and deletion actions". Agree the exact scope with the evaluators' reading in mind before building it.
+- **Bonus conditions.** Bonus points only count once the 14 points are validated, and each extra module needs a README justification and real product value (§3).
+- **Custom modules can be refused** with 0 points. None is in the plan.
+- **2D art cost.** The proposal says 2D needs good artwork to avoid looking like a plain gallery. Budget time for the room illustration (not in the estimates).
+- **A fixed room is thin on its own.** With no placeable objects, the depth of the product comes from the contents: well-modelled types and attributes, the media integration, search and tags. Invest there.
+- **Multi-user demo without a layout conflict story.** Show concurrency another way: unique constraints on sign-ups and friend requests, and two users adding contents or sending chat messages at the same time while a visitor sees live updates and notifications.
+- **The stretch must not eat the plan.** The 3D room and the galaxy menu only start once the core modules are demo-ready.
 
-## 6. Answer to the question in the notes: hardest and safest
+## 8. Data model
 
-**Hardest (cost and risk of ending with 0 points):** Advanced 3D, microservices, ELK, WAF + Vault, RAG and the ML recommendation system, the room editor, WCAG full compliance.
-
-**Safest (low effort, clear acceptance criteria):** ORM, multiple languages, additional browsers, OAuth, PWA, GDPR, health check and backups, Advanced search.
-
-These two lists come from my reading of the subject and the estimates above. The question to the experts in the notes is still worth asking, since their view of how strict the evaluators are about each module is more reliable than ours.
-
-## 7. Data model
-
-The data model (changes to the proposal's schema, the full list of MVP tables, and how to handle type-specific attributes) now lives in [database_schema.md](database_schema.md).
+The data model lives in [database_schema.md](database_schema.md), in two versions: schema A for the required part (9 tables) and schema B for the required part plus the buffer modules (13 tables, plus 3 new columns).

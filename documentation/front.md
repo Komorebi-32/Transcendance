@@ -1,6 +1,19 @@
+# What is this doc
+
+Specs for the front. 
+
 # Front: details
 
 Context: subject p. 9 requires a "frontend that is clear, responsive, and accessible across all devices". Evaluators ask every team member to explain their code (p. 2-3, p. 6), and only fully demonstrable modules count (p. 11).
+
+**Decisions (Nov 24)**
+
+| | MVP | If there is time |
+|---|---|---|
+| Room | 2D pixel-art image with clickable hotspots (§2, §3) | 3D room, built by Matthieu (§1) |
+| Menu | Simple text menu, one link per category (§4) | Galaxy menu: category icons orbit like planets (§4) |
+
+Both extras read the same hotspot list as the MVP, so they never block it.
 
 ## 1. Why 2D is easier to explain than 3D
 
@@ -19,10 +32,11 @@ Context: subject p. 9 requires a "frontend that is clear, responsive, and access
 - Either a real 3D scene with an orthographic camera (same complexity as low poly), or 2D sprites sorted by depth with non-obvious math.
 - Hardest to justify.
 
-**Trade-off**
+**Trade-off and decision**
 - Only real 3D can validate the Major module "advanced 3D graphics with Three.js / Babylon.js" (2 pts, p. 17).
 - 14 points are reachable without it, so 3D is an optional upgrade.
-- Keep the clickable objects as data (`{id, label, x, y, w, h, route}`) so a 3D scene could reuse them later.
+- **Decision: 2D for the MVP. If there is time, Matthieu builds a 3D version of the room** (e.g. React Three Fiber). It would count as a bonus module, but the bonus is capped at 5 points, so it only adds points if the buffer modules do not already fill that cap (see [modules_and_workload.md](modules_and_workload.md)).
+- Keep the clickable objects as data (`{id, label, x, y, w, h, route}`) so the 3D scene can reuse them: only the room view changes, not the data or the pages behind it.
 
 ## 2. Stack options for the 2D version (with React)
 
@@ -95,14 +109,25 @@ Things to watch:
 - **Mobile:** a wide image becomes small on a phone, so keep the mobile menu fallback.
 - **Finding polygon coordinates:** open the image in an editor, or use a small helper that logs click positions as percentages.
 
-## 4. Mobile version (open question)
+## 4. Responsive menu
 
-- Make the menu the primary navigation, and the room an enhanced layer on top of it.
-- Candidates: simple list menu, or slidable cards (icon + text) per category (books, movies, music, meditation, photography, video games, paintings).
-- Reusing the same `objects` data for both room and menu keeps the code explainable.
+Decision: the menu is the main navigation on phones, and the room is a richer layer on top of it on larger screens. Both are generated from the same `objects` (hotspot) list, so they always show the same categories.
+
+**MVP: simple text menu**
+- One text link per category (books, movies, music, meditation, photography, video games, paintings, and the treasure chest for custom categories), generated from the hotspot list.
+- A plain `<nav>` with a list of links: it works with the keyboard and screen readers without extra effort.
+- On large screens it stays reachable next to the room (e.g. a collapsible side menu), so no page can only be reached by clicking the image.
+
+**If there is time: galaxy menu**
+- The member's avatar sits in the centre, and the category icons orbit around it like planets, on one or two rings.
+- Built with CSS (or SVG) animations: each planet is a positioned element rotating around the centre. No game engine needed.
+- Each icon stays a real link with a label (shown on hover and focus, always shown on touch screens), so it stays accessible.
+- Respect `prefers-reduced-motion`: the orbits stop and the icons stay in place.
+- If it is not ready in time, the text menu ships as is. Nothing else depends on it.
 
 ## 5. Evaluation talking points
 
 - "The room is a picture, and each clickable object is a rectangle or polygon stored in a list."
 - Accessibility (WCAG 2.1 AA Major module) is satisfied by real buttons / links with labels, not by canvas.
 - Limitation to mention: the room is fixed, so users cannot rotate or move around it (unlike real 3D).
+- The 3D room and the galaxy menu are extras: they reuse the hotspot data, so the MVP never depends on them.
