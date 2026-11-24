@@ -23,7 +23,7 @@ issue #12 → branch feat/12-room-hotspots → commits → pull request → revi
 
 1. Pick an issue (or create one) and assign yourself.
 2. Create a branch from an up-to-date `main`.
-3. Commit small steps, using the commit format (§3).
+3. Commit one change at a time (atomic commits, §3.5), using the commit format (§3).
 4. Open a pull request into `main`. Its title follows the commit format.
 5. Another member reviews it and approves it.
 6. You squash and merge. GitHub deletes the branch and closes the issue.
@@ -60,9 +60,9 @@ Name: `<type>/<issue>-<short-name>`, in lowercase, with words separated by hyphe
 | `fix/24-chat-duplicate-messages` | A bug fix |
 | `docs/readme-run-steps` | A README change, no issue needed |
 
-## 3. Commit messages
+## 3. Commits
 
-We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), with the type list of commitlint's `config-conventional` (§7.1).
+Every commit is **atomic**: it holds one complete change and nothing else (§3.5). Its message follows [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/), with the type list of commitlint's `config-conventional` (§7.1).
 
 ### 3.1 Format
 
@@ -101,7 +101,7 @@ We follow [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1
 
 ### 3.3 Scopes
 
-The scope says which part of the project the commit touches. It is lowercase and comes from the table below. Leave it out when a change concerns the whole project, for example `chore: ignore .env files`. Use one scope per commit: if you need two, the commit probably does two things, so split it.
+The scope says which part of the project the commit touches. It is lowercase and comes from the table below. Leave it out when a change concerns the whole project, for example `chore: ignore .env files`. Use one scope per commit: if you need two, the commit probably does two things, so split it (§3.5).
 
 The groups come from [modules_and_workload.md](documentation/modules_and_workload.md) §6.2. The column says who owns the area, not who may commit there. To add a scope, add it to this table and to `commitlint.config.mjs` (§7.1) in the same pull request.
 
@@ -166,6 +166,45 @@ Not like this:
 | `doc: add readme` | The type is `docs` |
 | `feat(Room): Added hotspots.` | Scope in uppercase, past tense, capital letter, final period |
 | `feat(room, chat): ...` | Two scopes: split the commit |
+| `feat(room): add hotspots and fix login typo` | Two changes: two commits (§3.5) |
+
+### 3.5 Atomic commits
+
+**Rule: every commit is atomic.** It holds one logical change, complete, and nothing else.
+- **One change**: its first line names it with one type and one scope, without "and".
+- **Complete**: the code still builds and the tests pass after it. The change comes with what it needs: its tests, its migration, its i18n keys, its `.env.example` line.
+- **Nothing else**: no unrelated fix, no reformatting of a file you happened to open, no leftover debug `console.log`.
+
+Atomic is about meaning, not size. A commit can touch several files, such as an endpoint and its test, and stay atomic. A two-line commit that fixes a bug and renames a variable is not.
+
+The same rule applies one level up. A pull request does one thing (one issue), because it becomes one commit on `main` (§4.3).
+
+**Why**
+- **Reviews**: the reviewer reads the pull request commit by commit, and each message says what to expect. A bug hidden in a commit that also renames and reformats goes unnoticed.
+- **Undoing**: `git revert <commit>` removes exactly one change. If a commit mixes a fix and a feature, reverting the feature also removes the fix.
+- **Finding bugs**: `git bisect` walks the history to find the commit that broke something. It only works if every commit builds, and it only helps if the guilty commit does one thing.
+- **Clear messages**: a commit that does one thing is easy to name. Most bad messages ("update", "fixes") come from commits that do several things.
+- **Evaluation**: one change per commit gives "clear commit messages describing the changes" (subject p. 8) for free. Each of us can also point to our own commits when explaining our part.
+
+**How**
+1. **Plan the steps.** Before coding, split the issue into steps, one commit each. For `feat/12-room-hotspots`:
+   ```
+   feat(room): add the hotspot list of the living room
+   feat(room): show hotspots as buttons over the room image
+   feat(room): open the content list on hotspot click
+   feat(room): highlight a hotspot on hover and keyboard focus
+   ```
+2. **Commit as soon as a step works**, before starting the next one, not at the end of the day.
+3. **Look before you commit.** `git status` lists the changed files. `git diff` shows the changes not staged yet. `git diff --staged` shows exactly what the commit will contain.
+4. **Stage on purpose.** Name the files: `git add src/room/Room.tsx`. Avoid `git add .` and `git commit -a`, which take everything, unrelated changes included. To take only part of a file, run `git add -p`: Git shows each block of changes and asks whether to stage it (`y` yes, `n` no, `s` split it smaller, `q` quit). `git restore --staged <file>` takes a file back out.
+5. **Keep side changes apart.** Spotted a bug elsewhere, or a file that needs reformatting? Do not fold it into your commit. Commit it on its own (with `git add -p` on just those lines), or open an issue. Reformatting and renaming get their own `style` or `refactor` commit.
+6. **Interrupted by something urgent?** Put your unfinished work aside with `git stash`, make and commit the urgent change, then get your work back with `git stash pop`.
+7. **Forgot something in your last commit?** Stage it, then run `git commit --amend --no-edit` to add it to that commit. If you had already pushed it, follow with `git push --force-with-lease`, and only on your own branch.
+
+Before each commit, check:
+- [ ] The first line names one change, with one type and one scope.
+- [ ] `git diff --staged` shows that change and nothing else.
+- [ ] The code builds and the tests pass.
 
 ## 4. Pull requests
 
@@ -175,7 +214,7 @@ Not like this:
 - **Title**: a commit first line (§3). At merge, it becomes the commit on `main`, so it matters more than the commits of your branch.
 - **Description**: it becomes the body of that commit. Say why and how, how to test it, then the footers (`Closes #12`, `Co-authored-by:`).
 - Request one reviewer.
-- Keep it small. Under about 400 changed lines, a review takes minutes instead of hours.
+- Keep it small and atomic: one issue, one purpose (§3.5). Under about 400 changed lines, a review takes minutes instead of hours.
 
 ### 4.2 Reviewing one
 
@@ -194,7 +233,7 @@ Then approve, or request changes with concrete comments.
 ### 4.3 Merging
 
 - The author merges, once the pull request is approved and CI is green.
-- Use **Squash and merge**, the only method enabled. All the commits of the branch become one commit on `main`, authored by the author of the pull request. Work-in-progress commits ("fix typo", "try again") stay out of `main`, and a whole feature can be reverted in one commit.
+- Use **Squash and merge**, the only method enabled. All the commits of the branch become one commit on `main`, authored by the author of the pull request. The atomic commits of the branch served the review. On `main`, the atomic unit is the pull request, so a whole feature can be reverted in one commit, and follow-up commits from the review stay out of `main`.
 - In the merge box, check the message before confirming: the title follows §3 (GitHub adds the pull request number, like `(#12)`), the body is the why and the how, and the footers come last (`Closes #12`, `Co-authored-by:` lines).
 - GitHub deletes the branch on its own. Delete yours locally (§5).
 
@@ -208,8 +247,10 @@ git pull
 # Create your branch
 git switch -c feat/12-room-hotspots
 
-# Work and commit often
-git add src/room/Room.tsx
+# Work and commit one change at a time (§3.5)
+git status
+git diff
+git add src/room/Room.tsx    # or git add -p to pick parts of a file
 git commit -m "feat(room): add clickable hotspots on the room image"
 
 # First push, then open the pull request (or open it on github.com)
