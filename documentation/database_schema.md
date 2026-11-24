@@ -2,6 +2,8 @@
 
 The database schema, in two versions: **schema A** for the required part of the project (mandatory part + the 14 core points), and **schema B** for the required part plus the 7 buffer modules. The modules themselves are listed in [modules_and_workload.md](modules_and_workload.md).
 
+last update 24th of November
+
 # Database schema
 
 Sources: the data model sketch in `ft_transcendence Architecture and Tech Stack Proposal-1.pdf` ("the proposal"), adjusted to our MVP scope, and the module plan in [modules_and_workload.md](modules_and_workload.md) §2.
