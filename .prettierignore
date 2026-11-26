@@ -1,0 +1,12 @@
+dist
+coverage
+pnpm-lock.yaml
+apps/api/src/generated
+
+# Team notes, slides and PDFs are written by hand: don't reformat them.
+# Only the platform docs and decision records are checked.
+documentation/*
+!documentation/platform/
+!documentation/decisions/
+CONTRIBUTING.md
+README.md
