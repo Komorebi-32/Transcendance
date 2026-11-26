@@ -1,0 +1,37 @@
+name: Task / feature
+description: One task for one pull request, ideally 1 to 3 days of work (CONTRIBUTING §6)
+labels: ['enhancement']
+body:
+  - type: dropdown
+    id: group
+    attributes:
+      label: Group
+      description: Also add the matching `group:` label.
+      options:
+        - A · Platform and data
+        - B · Identity, UI kit and room
+        - C · Social and docs
+        - D · Content
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What exists when this is done? Write it so someone else could check it.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      value: |
+        - [ ]
+        - [ ] Docs updated
+    validations:
+      required: true
+  - type: textarea
+    id: depends
+    attributes:
+      label: Depends on / blocks
+      description: Link issues, e.g. "blocked by #4", "blocks #9".
