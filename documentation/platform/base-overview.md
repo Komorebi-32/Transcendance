@@ -1,6 +1,6 @@
 # Platform base — what's in the repo and why
 
-_Owner: Group A, Platform and data (Merve) · Covers: Day 1 of the platform setup_
+_Owner: Group A, Platform and data (Merve) · Covers: Days 1–2 of the platform setup_
 
 This is the base every group builds on. Three ideas hold it together:
 
@@ -14,17 +14,14 @@ The day-to-day rules (branches, commits, pull requests, issues) are in [CONTRIBU
 
 ## What this means for you
 
-**Get it running**
+**Get it running** — full guide, Podman setup and troubleshooting in [getting-started.md](getting-started.md)
 
 ```bash
-nvm use            # Node 22
-corepack enable    # installs the pnpm version pinned in package.json
-pnpm install
-pnpm build
-pnpm dev           # API on http://localhost:3000, web on http://localhost:5173
+make               # the full stack in containers → https://localhost:8443
+pnpm dev           # local development with reload → http://localhost:5173
 ```
 
-Check: http://localhost:3000/api/health returns `{"status":"ok",...}` and the web page shows "API: ok".
+Both show "Showcase Room" and "API: ok".
 
 **Where your code goes**
 
@@ -53,11 +50,13 @@ apps/
   web/                 React + Vite front end
 packages/
   shared/              @ft/shared — types + Zod schemas used by both apps (the contract package)
-infra/proxy/           HTTPS reverse proxy (Day 2)
+infra/proxy/           nginx: HTTPS, serves the web build, forwards /api and /socket.io
 documentation/
   platform/            platform docs (this file, more to come)
   decisions/           decision records: why we chose what we chose
 scripts/               one-off tooling (GitHub setup)
+docker-compose.yml     the three services: db, api, proxy
+Makefile               shortcuts: make, make ps, make logs, make down, make clean
 .github/               CI, issue/PR templates, CODEOWNERS
 ```
 
@@ -133,13 +132,13 @@ The shared package's `package.json` → `"exports"` tells each consumer which fi
 
 Read the files as a chain:
 
-| File                                      | Role                                                                                                                                                                                                               |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/main.ts`                             | Starts the app: creates it from `AppModule`, prefixes every route with `/api`, listens on port 3000. The `/api` prefix is what lets the proxy (Day 2) send `/api/*` to the API and everything else to the web app. |
-| `src/app.module.ts`                       | Root module. Each group plugs its module in here: `IdentityModule`, `SocialModule`, `ContentModule`.                                                                                                               |
-| `src/modules/system/system.module.ts`     | A feature module (owned by A). A module groups related controllers and services.                                                                                                                                   |
-| `src/modules/system/health.controller.ts` | Handles `GET /api/health`.                                                                                                                                                                                         |
-| `nest-cli.json`, `tsconfig.build.json`    | Tell `nest build` how to compile.                                                                                                                                                                                  |
+| File                                      | Role                                                                                                                                                                                                                          |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/main.ts`                             | Starts the app: creates it from `AppModule`, prefixes every route with `/api`, listens on port 3000 over IPv4 and IPv6. The `/api` prefix is what lets the proxy send `/api/*` to the API and everything else to the web app. |
+| `src/app.module.ts`                       | Root module. Each group plugs its module in here: `IdentityModule`, `SocialModule`, `ContentModule`.                                                                                                                          |
+| `src/modules/system/system.module.ts`     | A feature module (owned by A). A module groups related controllers and services.                                                                                                                                              |
+| `src/modules/system/health.controller.ts` | Handles `GET /api/health`.                                                                                                                                                                                                    |
+| `nest-cli.json`, `tsconfig.build.json`    | Tell `nest build` how to compile.                                                                                                                                                                                             |
 
 **What a controller is:** a class that receives HTTP requests for a URL and returns the response.
 
@@ -195,18 +194,36 @@ This pattern arrives with a full example on Days 3–6.
 
 ## 7. Team workflow
 
-| File                               | Role                                                                                                             |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `.github/workflows/ci.yml`         | Runs on every PR: install, format check, lint, typecheck, build, test. `main` requires it to pass.               |
-| `.github/CODEOWNERS`               | Automatically requests a review from the group that owns the files a PR touches.                                 |
-| `.github/pull_request_template.md` | PR description in the shape of CONTRIBUTING §4: why, how, how to test, the §4.2 review checklist, footers.       |
-| `.github/ISSUE_TEMPLATE/*.yml`     | Optional forms for **Task / feature**, **Bug** and **Contract change** (one approval box per group).             |
-| `scripts/setup-github.sh`          | Creates the `group:` labels and milestones of CONTRIBUTING §6, optionally group A's Foundations issues.          |
-| `CONTRIBUTING.md`                  | The team's Git and GitHub rules (written by Benjamin).                                                           |
-| `documentation/decisions/`         | Decision records — monorepo + TypeScript, Prisma, UUIDs and timestamps. Ready answers to "why did you choose X?" |
-| `README.md`                        | Placeholder; group C writes the final one.                                                                       |
+| File                               | Role                                                                                                                               |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/workflows/ci.yml`         | Runs on every PR: install, format check, lint, typecheck, build, test. `main` requires it to pass.                                 |
+| `.github/CODEOWNERS`               | Automatically requests a review from the group that owns the files a PR touches.                                                   |
+| `.github/pull_request_template.md` | PR description in the shape of CONTRIBUTING §4: why, how, how to test, the §4.2 review checklist, footers.                         |
+| `.github/ISSUE_TEMPLATE/*.yml`     | Optional forms for **Task / feature**, **Bug** and **Contract change** (one approval box per group).                               |
+| `scripts/setup-github.sh`          | Creates the `group:` labels and milestones of CONTRIBUTING §6, optionally group A's Foundations issues.                            |
+| `CONTRIBUTING.md`                  | The team's Git and GitHub rules (written by Benjamin).                                                                             |
+| `documentation/decisions/`         | Decision records — monorepo + TypeScript, Prisma, UUIDs and timestamps, the Docker stack. Ready answers to "why did you choose X?" |
+| `README.md`                        | Placeholder; group C writes the final one.                                                                                         |
 
 **PR = Pull Request**: on GitHub, your request to merge a branch into `main`. It shows the diff, collects reviews and runs CI. Once approved and green, it's squash-merged.
+
+---
+
+## 8. Docker stack
+
+One command (`make`) starts three services. Only the proxy is published on the host; the reasons are in [decision 0004](../decisions/0004-docker-stack.md).
+
+| File                                | Role                                                                                                                                                 |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docker-compose.yml`                | The services `db` (Postgres 18), `api` and `proxy`, their volumes, and the startup order through healthchecks: db → api → proxy.                     |
+| `apps/api/Dockerfile`               | Two stages: build the API with pnpm, then run only `dist/` and production dependencies (`pnpm deploy`) as the non-root `node` user.                  |
+| `infra/proxy/Dockerfile`            | Two stages: build the React app, then nginx serves `dist/`.                                                                                          |
+| `infra/proxy/default.conf.template` | nginx config: HTTP → HTTPS redirect, `/api` and `/socket.io` to the API, `index.html` for client-side routes. `${HTTPS_PORT}` is filled in at start. |
+| `infra/proxy/30-generate-cert.sh`   | Creates a self-signed certificate on first start, kept in the `certs` volume.                                                                        |
+| `infra/proxy/31-ipv6-fallback.sh`   | Removes the IPv6 `listen` lines on kernels without IPv6.                                                                                             |
+| `.env.example`                      | Every variable the stack needs; `make` copies it to `.env` on the first run.                                                                         |
+| `.dockerignore`                     | Keeps `node_modules`, builds, docs and secrets out of the images.                                                                                    |
+| `Makefile`                          | Shortcuts: `make`, `make ps`, `make logs`, `make down`, `make db`, `make clean`, `make re`.                                                          |
 
 ---
 
@@ -217,14 +234,16 @@ This pattern arrives with a full example on Days 3–6.
 | Repo       | Monorepo, pnpm workspaces, TypeScript 6.0                                                | [0001](../decisions/0001-monorepo-pnpm-typescript.md) |
 | ORM        | Prisma 7.10.x (pinned — npm's `latest` tag currently points to an 8.0 release candidate) | [0002](../decisions/0002-orm-prisma.md)               |
 | Data types | UUID ids, `timestamptz`, ISO strings in JSON, Postgres enums mirrored in `@ft/shared`    | [0003](../decisions/0003-ids-and-timestamps.md)       |
+| Docker     | Three services, nginx in front, HTTPS on 8443, certificate generated at first start      | [0004](../decisions/0004-docker-stack.md)             |
 
 ---
 
 ## Coming next from group A (Merve)
 
+Done: Day 1 (monorepo, shared package, CI) and Day 2 (Docker stack with HTTPS).
+
 | Day | Delivers                                                                                 | Unblocks                                 |
 | --- | ---------------------------------------------------------------------------------------- | ---------------------------------------- |
-| 2   | Docker Compose + HTTPS proxy, one command, `.env.example`                                | Everyone running the full stack          |
 | 3   | NestJS base (config, validation, error format) + shared enums/errors/pagination          | API work in every group                  |
 | 4   | Prisma schema (9 required tables; the 4 buffer tables come later), first migration, seed | Anything touching the database           |
 | 5   | React router + API client + i18n + CI                                                    | UI work in every group                   |
