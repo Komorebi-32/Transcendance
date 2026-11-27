@@ -1,0 +1,53 @@
+# Generated at container start: the official nginx image replaces ${VARIABLES}
+# with environment values and writes the result to /etc/nginx/conf.d/default.conf.
+
+# HTTP only redirects to HTTPS: nothing is ever served in plain text.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+
+    return 301 https://$host:${HTTPS_PORT}$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name _;
+
+    # Created on first start by 30-generate-cert.sh, kept in the "certs" volume
+    ssl_certificate     /etc/nginx/certs/cert.pem;
+    ssl_certificate_key /etc/nginx/certs/key.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+
+    # REST API → the api service ("api" is its name on the Docker network)
+    location /api/ {
+        proxy_pass http://api:3000;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # WebSocket (Socket.IO) → same service, upgraded from HTTP
+    location /socket.io/ {
+        proxy_pass http://api:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+        proxy_set_header Host              $host;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 1h;
+    }
+
+    # React app: built files, and index.html for any other path
+    # so client-side routes like /rooms/42 survive a page reload
+    root  /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
