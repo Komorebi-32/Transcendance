@@ -1,0 +1,62 @@
+# The whole stack, one command: make (or docker compose up --build).
+# Only the proxy is published on the host; db and api live on the internal network.
+name: transcendence
+
+services:
+  db:
+    image: docker.io/library/postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set it in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set it in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set it in .env}
+    volumes:
+      # Postgres 18+: mount the parent folder, not .../data as in older versions
+      - db-data:/var/lib/postgresql
+    ports:
+      # For local development with pnpm dev only: bound to this machine, never the network
+      - '127.0.0.1:${DB_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    environment:
+      # Built from the db values above, so the password lives in one place (.env)
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/api/health']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  proxy:
+    build:
+      context: .
+      dockerfile: infra/proxy/Dockerfile
+    restart: unless-stopped
+    environment:
+      # Used by the HTTP → HTTPS redirect, which must point at the host port
+      HTTPS_PORT: ${HTTPS_PORT:-8443}
+    ports:
+      - '${HTTPS_PORT:-8443}:443'
+      - '${HTTP_PORT:-8080}:80'
+    volumes:
+      - certs:/etc/nginx/certs
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  db-data:
+  certs:
