@@ -2,7 +2,7 @@
 # Built from the repo root: docker build -f apps/api/Dockerfile .
 
 # ── Stage 1: build ──────────────────────────────────────────────
-FROM node:22-alpine AS build
+FROM docker.io/library/node:22-alpine AS build
 WORKDIR /app
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
@@ -24,7 +24,7 @@ RUN pnpm --filter @ft/shared build && pnpm --filter @ft/api build
 RUN pnpm --filter @ft/api deploy --prod --legacy /out
 
 # ── Stage 2: run ────────────────────────────────────────────────
-FROM node:22-alpine
+FROM docker.io/library/node:22-alpine
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
