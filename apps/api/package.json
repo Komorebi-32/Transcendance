@@ -1,0 +1,26 @@
+{
+  "name": "@ft/api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NestJS API (REST + WebSocket gateways)",
+  "scripts": {
+    "build": "nest build",
+    "dev": "nest start --watch",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ft/shared": "workspace:*",
+    "@nestjs/common": "^12.6.0",
+    "@nestjs/core": "^12.6.0",
+    "@nestjs/platform-express": "^12.6.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^12.0.15",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.0",
+    "typescript": "~6.0.3"
+  }
+}

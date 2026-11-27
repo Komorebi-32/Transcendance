@@ -1,0 +1,47 @@
+name: Contract change
+description: Propose a change to a contract between groups (shared types, API route, WebSocket event, shared table)
+title: '[contract] '
+labels: ['question']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Contracts are where one group's code meets another's (modules_and_workload.md §6.3).
+        Agree on the change here **before** the pull request. The pull request then uses `!` in its
+        title and a `BREAKING CHANGE:` footer if other groups must change their code (CONTRIBUTING §3.2).
+  - type: input
+    id: file
+    attributes:
+      label: File(s) or interface
+      placeholder: packages/shared/src/errors.ts
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed change
+      description: Before → after. Paste the type or schema diff if you can.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+    validations:
+      required: true
+  - type: checkboxes
+    id: breaking
+    attributes:
+      label: Impact
+      options:
+        - label: Breaking — another group must change its code
+  - type: checkboxes
+    id: approvals
+    attributes:
+      label: Approvals (each group that uses it ticks its box)
+      options:
+        - label: A · Platform and data
+        - label: B · Identity, UI kit and room
+        - label: C · Social and docs
+        - label: D · Content

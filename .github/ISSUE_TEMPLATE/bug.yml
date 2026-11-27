@@ -1,0 +1,42 @@
+name: Bug
+description: Something is broken (CONTRIBUTING §6)
+labels: ['bug']
+body:
+  - type: dropdown
+    id: group
+    attributes:
+      label: Group
+      description: Also add the matching `group:` label.
+      options:
+        - A · Platform and data
+        - B · Identity, UI kit and room
+        - C · Social and docs
+        - D · Content
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      value: |
+        1.
+        2.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected vs what happened
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      render: shell

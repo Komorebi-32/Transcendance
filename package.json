@@ -1,0 +1,26 @@
+{
+  "name": "ft-transcendence",
+  "private": true,
+  "description": "Showcase Room — ft_transcendence",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "pnpm --filter @ft/shared build && pnpm --filter \"./apps/*\" build",
+    "dev": "pnpm --filter @ft/shared build && pnpm --parallel --filter \"./apps/*\" --filter @ft/shared dev",
+    "typecheck": "pnpm --filter @ft/shared build && pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm -r --if-present test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.15.0",
+    "globals": "^17.14.0",
+    "prettier": "^3.10.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.73.0"
+  }
+}

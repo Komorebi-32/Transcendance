@@ -1,0 +1,47 @@
+# Who gets asked to review what. GitHub requests these owners automatically
+# when a PR touches their files.
+#
+# Note: a pull request needs 1 approval from any member (CONTRIBUTING §2.1),
+# not a code-owner approval: with one owner per area, an owner's own PRs
+# would deadlock. Contract changes follow CONTRIBUTING §3.2 (`!` + a
+# BREAKING CHANGE footer + tell the group directly).
+#
+# ⚠️ Replace the placeholders with real GitHub usernames (or @org/team names):
+#   @OWNER_A = Platform and data (Merve)    @OWNER_B = Identity, UI kit and room (Benjamin)
+#   @OWNER_C = Social and docs (to be confirmed)    @OWNER_D = Content (Samira)
+# Later lines win over earlier ones.
+
+# Default: platform reviews anything not listed below
+*                                   @OWNER_A
+
+# ── Feature areas: each group owns its folders ──────────────────────────
+/apps/api/src/modules/identity/     @OWNER_B
+/apps/web/src/features/identity/    @OWNER_B
+/apps/web/src/features/room/        @OWNER_B
+/apps/web/src/ui/                   @OWNER_B
+
+/apps/api/src/modules/social/       @OWNER_C
+/apps/web/src/features/social/      @OWNER_C
+
+/apps/api/src/modules/content/      @OWNER_D
+/apps/web/src/features/content/     @OWNER_D
+
+# ── Contract files: owner + every group that consumes them ──────────────
+/packages/shared/                   @OWNER_A
+/packages/shared/src/content/       @OWNER_D @OWNER_B @OWNER_C
+/packages/shared/src/ws-events.ts   @OWNER_C @OWNER_D @OWNER_B
+/packages/shared/src/auth.ts        @OWNER_B @OWNER_C @OWNER_D
+/packages/shared/src/errors.ts      @OWNER_A @OWNER_B @OWNER_C @OWNER_D
+/packages/shared/src/common.ts      @OWNER_A @OWNER_B @OWNER_C @OWNER_D
+/packages/shared/src/enums.ts       @OWNER_A @OWNER_B @OWNER_C @OWNER_D
+
+/apps/api/prisma/                   @OWNER_A
+/docker-compose.yml                 @OWNER_A
+/infra/                             @OWNER_A
+/.env.example                       @OWNER_A
+/apps/web/src/i18n/                 @OWNER_A
+/.github/                           @OWNER_A
+
+# Docs: social & docs group owns the README; each group owns its own docs
+/README.md                          @OWNER_C
+/documentation/platform/            @OWNER_A
